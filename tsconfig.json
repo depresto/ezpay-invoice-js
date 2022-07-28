@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "rootDir": "src",
+    "target": "es5",
+    "lib": ["es2015", "es2020"],
+    "strict": true,
+    "esModuleInterop": true,
+    "removeComments": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "declaration": true,
+    "outDir": "./build"
+  },
+  "include": ["src/"],
+  "exclude": ["node_modules"]
+}
