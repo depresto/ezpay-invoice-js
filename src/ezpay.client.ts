@@ -34,6 +34,7 @@ export type InvoiceProps = {
   Category: "B2B" | "B2C";
   BuyerName: string;
   BuyerEmail?: string;
+  BuyerPhone?: string;
   BuyerUBN?: string;
   BuyerAddress?: string;
   CarrierType?: "0" | "1" | "2";
@@ -49,7 +50,7 @@ export type InvoiceProps = {
   AmtZero?: number;
   AmtFree?: number;
   TaxAmt?: number;
-  TotalAmt: number;
+  TotalAmt?: number;
   ItemName: string;
   ItemCount: string;
   ItemUnit: string;
@@ -104,7 +105,11 @@ class EzpayInvoiceClient {
         Status: "1",
         CreateStatusTime: "",
         TaxRate: 5,
-        TaxAmt: 0,
+        TaxAmt: params.Amt * 0.05,
+        TotalAmt: params.Amt * 1.05,
+        PrintFlag: "N",
+        CarrierType: "2",
+        CarrierNum: params.BuyerEmail ?? params.BuyerPhone,
         ...params,
       }),
     });
@@ -123,7 +128,7 @@ class EzpayInvoiceClient {
     return {
       Status: data.Status,
       Message: data.Message,
-      Result: data.Result,
+      Result: data.Result ? JSON.parse(data.Result) : null,
     };
   }
 
