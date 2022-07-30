@@ -123,7 +123,7 @@ class EzpayInvoiceClient {
     return {
       Status: data.Status,
       Message: data.Message,
-      Result: data.Result ? JSON.parse(data.Result) : null,
+      Result: data.Result,
     };
   }
 
