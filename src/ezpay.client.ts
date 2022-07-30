@@ -83,11 +83,7 @@ class EzpayInvoiceClient {
 
   private buildPostParams(params: { [key: string]: any }) {
     const postData = new URLSearchParams(params).toString();
-    const cipher = crypto.createCipheriv(
-      "aes-256-cbc",
-      this.hashKey,
-      this.hashIV
-    );
+    const cipher = crypto.createCipheriv("aes256", this.hashKey, this.hashIV);
     let encrypted = cipher.update(postData, "utf8", "hex");
     encrypted += cipher.final("hex");
     return encrypted;
