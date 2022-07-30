@@ -33,6 +33,7 @@ export type InvoiceProps = {
   CreateStatusTime?: string;
   Category: "B2B" | "B2C";
   BuyerName: string;
+  BuyerEmail?: string;
   BuyerUBN?: string;
   BuyerAddress?: string;
   CarrierType?: "0" | "1" | "2";
