@@ -14,7 +14,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "deploy": "yarn build && yarn publish --access public",
+    "deploy-npm": "pnpm build && pnpm publish --access public",
     "test": "jest"
   },
   "bugs": {
