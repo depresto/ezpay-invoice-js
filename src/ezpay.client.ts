@@ -125,10 +125,15 @@ class EzpayInvoiceClient {
       }
     );
 
+    let Result = data.Result;
+    try {
+      Result = JSON.parse(data.Result);
+    } catch {}
+
     return {
       Status: data.Status,
       Message: data.Message,
-      Result: data.Result ? JSON.parse(data.Result) : null,
+      Result,
     };
   }
 
