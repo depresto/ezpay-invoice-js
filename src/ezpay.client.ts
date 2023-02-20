@@ -29,7 +29,7 @@ export type InvoiceProps = {
   TimeStamp?: number;
   TransNum?: string;
   MerchantOrderNo: string;
-  Status?: "0" | "1";
+  Status?: "0" | "1" | "3";
   CreateStatusTime?: string;
   Category: "B2B" | "B2C";
   BuyerName: string;
