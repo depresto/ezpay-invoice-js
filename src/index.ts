@@ -7,8 +7,6 @@ export type EzpayApiResponse<T> = {
 };
 
 export type InvoiceProps = {
-  Version?: string;
-  TimeStamp?: number;
   TransNum?: string;
   MerchantOrderNo: string;
   Status?: "0" | "1" | "3";
@@ -61,8 +59,6 @@ export type RevokeInvoiceResult = {
 };
 
 export type IssueAllowanceProps = {
-  Version?: string;
-  TimeStamp?: number;
   InvoiceNo: string;
   MerchantOrderNo: string;
   ItemName: string;

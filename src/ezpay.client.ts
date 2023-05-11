@@ -43,7 +43,7 @@ class EzpayInvoiceClient {
   public async issueInvoice(
     params: InvoiceProps
   ): Promise<EzpayApiResponse<IssueInvoiceResult>> {
-    const data = await this.queryApi("allowance_issue", {
+    const data = await this.queryApi("invoice_issue", {
       Version: "1.5",
       TransNum: "",
       TaxType: "1",
@@ -103,12 +103,12 @@ class EzpayInvoiceClient {
   }
 
   public async revokeAllowance(
-    AllowanceNumber: string,
+    AllowanceNo: string,
     InvalidReason = ""
   ): Promise<EzpayApiResponse<RevokeAllowanceResult>> {
     return this.queryApi("allowanceInvalid", {
       Version: "1.0",
-      AllowanceNumber,
+      AllowanceNo,
       InvalidReason,
     });
   }
