@@ -4,3 +4,6 @@ node_modules
 *.test.js
 !*.d.ts
 *.test.d.ts
+
+build/*.test.js
+build/*.test.d.ts
