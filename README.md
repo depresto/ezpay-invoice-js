@@ -1,4 +1,4 @@
-# ezPay Invoice SDK js
+# ezPay Invoice SDK js [![CI](https://github.com/depresto/ezpay-invoice-js/workflows/CI/badge.svg)](https://github.com/depresto/ezpay-invoice-js/actions?query=workflow%3ACI) [![codecov](https://badgen.net/codecov/c/github/depresto/ezpay-invoice-js)](https://codecov.io/gh/depresto/ezpay-invoice-js)
 
 ezPay 發票 SDK
 
