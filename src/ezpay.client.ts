@@ -1,86 +1,35 @@
 import axios from "axios";
 import crypto from "crypto";
-
-export type InvoiceResponse<T> = {
-  Status: string;
-  Message: string;
-  Result: T | null;
-};
-export type IssueInvoiceResult = {
-  MerchantID: string;
-  InvoiceTransNo: string;
-  MerchantOrderNo: string;
-  TotalAmt: number;
-  InvoiceNumber: string;
-  RandomNum: string;
-  BarCode?: string;
-  QRcodeL?: string;
-  QRcodeR?: string;
-};
-export type RevokeInvoiceResult = {
-  MerchantID: string;
-  InvoiceNumber: string;
-  CreateTime: string;
-  CheckCode: string;
-};
-
-export type InvoiceProps = {
-  Version?: string;
-  TimeStamp?: number;
-  TransNum?: string;
-  MerchantOrderNo: string;
-  Status?: "0" | "1" | "3";
-  CreateStatusTime?: string;
-  Category: "B2B" | "B2C";
-  BuyerName: string;
-  BuyerEmail?: string;
-  BuyerPhone?: string;
-  BuyerUBN?: string;
-  BuyerAddress?: string;
-  CarrierType?: "0" | "1" | "2";
-  CarrierNum?: string;
-  LoveCode?: number;
-  PrintFlag?: "Y";
-  KioskPrintFlag?: "1";
-  TaxType?: "1" | "2" | "3" | "9";
-  TaxRate?: number;
-  CustomsClearance?: "1" | "2";
-  Amt: number;
-  AmtSales?: number;
-  AmtZero?: number;
-  AmtFree?: number;
-  TaxAmt?: number;
-  TotalAmt?: number;
-  ItemName: string;
-  ItemCount: string;
-  ItemUnit: string;
-  ItemPrice: string;
-  ItemAmt: string;
-  ItemTaxType?: string;
-  Comment?: string;
-};
+import {
+  IssueAllowanceProps,
+  EzpayApiResponse,
+  InvoiceProps,
+  IssueInvoiceResult,
+  RevokeInvoiceResult,
+  IssueAllowanceResult,
+  RevokeAllowanceResult,
+} from ".";
 
 class EzpayInvoiceClient {
-  version = "1.5";
+  apiEndpoint: string;
   merchantId: string;
   hashKey: string;
   hashIV: string;
-  dryRun: boolean;
+
   constructor(params: {
     merchantId: string;
     hashKey: string;
     hashIV: string;
     env: "sandbox" | "production";
-    version?: string;
   }) {
     this.merchantId = params.merchantId;
     this.hashKey = params.hashKey;
     this.hashIV = params.hashIV;
-    this.dryRun = params.env === "sandbox";
 
-    if (params.version) {
-      this.version = params.version;
-    }
+    this.apiEndpoint =
+      params.env === "sandbox"
+        ? "https://cinv.ezpay.com.tw/Api/"
+        : "https://inv.ezpay.com.tw/Api/";
   }
 
   private buildPostParams(params: { [key: string]: any }) {
@@ -93,37 +42,21 @@ class EzpayInvoiceClient {
 
   public async issueInvoice(
     params: InvoiceProps
-  ): Promise<InvoiceResponse<IssueInvoiceResult>> {
-    const query = new URLSearchParams({
-      MerchantID_: this.merchantId.toString(),
-      PostData_: this.buildPostParams({
-        RespondType: "JSON",
-        Version: "1.5",
-        TimeStamp: ~~(Date.now() / 1000),
-        TransNum: "",
-        TaxType: "1",
-        Status: "1",
-        CreateStatusTime: "",
-        TaxRate: 5,
-        TaxAmt: params.Amt * 0.05,
-        TotalAmt: params.Amt * 1.05,
-        PrintFlag: "N",
-        CarrierType: "2",
-        CarrierNum: params.BuyerEmail ?? params.BuyerPhone,
-        ...params,
-      }),
+  ): Promise<EzpayApiResponse<IssueInvoiceResult>> {
+    const data = await this.queryApi("allowance_issue", {
+      Version: "1.5",
+      TransNum: "",
+      TaxType: "1",
+      Status: "1",
+      CreateStatusTime: "",
+      TaxRate: 5,
+      TaxAmt: params.Amt * 0.05,
+      TotalAmt: params.Amt * 1.05,
+      PrintFlag: "N",
+      CarrierType: "2",
+      CarrierNum: params.BuyerEmail ?? params.BuyerPhone,
+      ...params,
     });
-    const { data } = await axios.post(
-      this.dryRun === true
-        ? "https://cinv.ezpay.com.tw/Api/invoice_issue"
-        : "https://inv.ezpay.com.tw/Api/invoice_issue",
-      query.toString(),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
 
     let Result = data.Result;
     try {
@@ -140,28 +73,63 @@ class EzpayInvoiceClient {
   public async revokeInvoice(
     InvoiceNumber: string,
     InvalidReason = ""
-  ): Promise<InvoiceResponse<RevokeInvoiceResult>> {
+  ): Promise<EzpayApiResponse<RevokeInvoiceResult>> {
+    return this.queryApi("invoice_invalid", {
+      Version: "1.0",
+      InvoiceNumber,
+      InvalidReason,
+    });
+  }
+
+  public async issueAllowance(
+    params: IssueAllowanceProps
+  ): Promise<EzpayApiResponse<IssueAllowanceResult>> {
+    const data = await this.queryApi("allowance_issue", {
+      Version: "1.3",
+      Status: "1",
+      ...params,
+    });
+
+    let Result = data.Result;
+    try {
+      Result = JSON.parse(data.Result);
+    } catch {}
+
+    return {
+      Status: data.Status,
+      Message: data.Message,
+      Result,
+    };
+  }
+
+  public async revokeAllowance(
+    AllowanceNumber: string,
+    InvalidReason = ""
+  ): Promise<EzpayApiResponse<RevokeAllowanceResult>> {
+    return this.queryApi("allowanceInvalid", {
+      Version: "1.0",
+      AllowanceNumber,
+      InvalidReason,
+    });
+  }
+
+  private async queryApi(
+    action: string,
+    params: { [key: string]: any }
+  ): Promise<EzpayApiResponse<any>> {
     const query = new URLSearchParams({
       MerchantID_: this.merchantId.toString(),
       PostData_: this.buildPostParams({
         RespondType: "JSON",
-        Version: "1.0",
         TimeStamp: ~~(Date.now() / 1000),
-        InvoiceNumber,
-        InvalidReason,
+        ...params,
       }),
     });
-    const { data } = await axios.post(
-      this.dryRun === true
-        ? "https://cinv.ezpay.com.tw/Api/invoice_invalid"
-        : "https://inv.ezpay.com.tw/Api/invoice_invalid",
-      query.toString(),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
+    const { data } = await axios.post(`${this.apiEndpoint}${action}`, query, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
     return data;
   }
 }

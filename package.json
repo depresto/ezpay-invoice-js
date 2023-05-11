@@ -1,6 +1,6 @@
 {
   "name": "ezpay-invoice-js",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "ezPay 發票 SDK",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",

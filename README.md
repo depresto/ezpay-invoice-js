@@ -19,7 +19,6 @@ const client = new EzpayInvoiceClient({
   hashKey: "ezPay Invoice Hash Key",
   hashIV: "ezPay Invoice Hash IV",
   env: "production", // 'sandbox' | 'production'
-  version: "1.5", // Optional
 });
 ```
 
@@ -32,11 +31,10 @@ const client = new EzpayInvoiceClient({
   hashKey: "ezPay Invoice Hash Key",
   hashIV: "ezPay Invoice Hash IV",
   env: "production", // 'sandbox' | 'production'
-  version: "1.5", // Optional
 });
 ```
 
-### Issue invoice
+### 開立發票 Issue invoice
 
 詳情請見官方文件：[文件網址](https://inv.ezpay.com.tw/dw_files/info_api/EZP_INVI_1_2_1.pdf)
 
@@ -46,13 +44,34 @@ await client.issueInvoice({
 })
 ```
 
-## Revoke invoice
+## 作廢發票 Revoke invoice
 
 詳情請見官方文件：[文件網址](https://inv.ezpay.com.tw/dw_files/info_api/EZP_INVI_1_2_1.pdf)
 
 ```javascript
 await client.revokeInvoice(
   'invoice number',   // 發票號碼 
+  'invoke reason'     // 作廢原因
+)
+```
+
+### 開立折讓 Issue allowance
+
+詳情請見官方文件：[文件網址](https://inv.ezpay.com.tw/dw_files/info_api/EZP_INVI_1_2_1.pdf)
+
+```javascript
+await client.issueAllowance({
+  
+})
+```
+
+## 作廢折讓 Revoke allowance
+
+詳情請見官方文件：[文件網址](https://inv.ezpay.com.tw/dw_files/info_api/EZP_INVI_1_2_1.pdf)
+
+```javascript
+await client.revokeAllowance(
+  'allowance number',   // 折讓號碼
   'invoke reason'     // 作廢原因
 )
 ```
