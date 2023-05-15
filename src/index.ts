@@ -49,6 +49,8 @@ export type IssueInvoiceResult = {
   BarCode?: string;
   QRcodeL?: string;
   QRcodeR?: string;
+  CreateTime: string;
+  CheckCode: string;
 };
 
 export type RevokeInvoiceResult = {
