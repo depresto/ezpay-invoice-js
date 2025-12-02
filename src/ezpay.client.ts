@@ -53,7 +53,6 @@ class EzpayInvoiceClient {
       TaxAmt: params.Amt * 0.05,
       TotalAmt: params.Amt * 1.05,
       PrintFlag: "N",
-      CarrierType: "2",
       CarrierNum: params.BuyerEmail ?? params.BuyerPhone,
       ...params,
     });
