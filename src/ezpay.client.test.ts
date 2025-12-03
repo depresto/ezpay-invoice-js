@@ -125,3 +125,12 @@ test("revokeAllowance", async () => {
   );
   expect(revokeAllowanceData.Status).toBe("SUCCESS");
 });
+
+test("queryInvoice", async () => {
+  const data = await client.queryInvoice({
+    InvoiceNumber: "NM00000036",
+    RandomNum: "4573",
+  });
+  expect(data.Status).toBe("SUCCESS");
+  expect(data.Result).toBeDefined();
+});

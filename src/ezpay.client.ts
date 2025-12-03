@@ -8,6 +8,8 @@ import {
   RevokeInvoiceResult,
   IssueAllowanceResult,
   RevokeAllowanceResult,
+  QueryInvoiceProps,
+  QueryInvoiceResult,
 } from ".";
 
 class EzpayInvoiceClient {
@@ -130,6 +132,36 @@ class EzpayInvoiceClient {
       },
     });
     return data;
+  }
+
+  public async queryInvoice(
+    params: QueryInvoiceProps
+  ): Promise<EzpayApiResponse<QueryInvoiceResult>> {
+    const data = await this.queryApi("invoice_search", {
+      Version: "1.3",
+      ...params,
+    });
+    if (data.Status !== "SUCCESS") {
+      return {
+        Status: data.Status,
+        Message: data.Message,
+        Result: null,
+      };
+    }
+    return {
+      Status: data.Status,
+      Message: data.Message,
+      Result: JSON.parse(data.Result),
+    };
+  }
+
+  public getQueryInvoicePostData(params: QueryInvoiceProps): string {
+    return this.buildPostParams({
+      Version: "1.3",
+      RespondType: "JSON",
+      TimeStamp: ~~(Date.now() / 1000),
+      ...params,
+    });
   }
 }
 
