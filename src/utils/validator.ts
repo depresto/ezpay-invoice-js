@@ -119,11 +119,19 @@ export function validateInvoiceIssueParams(
     }
   }
 
+  // CarrierType 型別宣告為字串 "0"/"1"/"2"，但呼叫端常見會傳入數字（如 0/1/2）。
+  // 用 !params.CarrierType 判斷「是否有提供」在數字 0 時會誤判為 falsy（未提供），
+  // 因此一律先正規化成字串再用「是否為 undefined/null/空字串」判斷有無提供。
+  const normalizedCarrierType =
+    params.CarrierType === undefined || params.CarrierType === null
+      ? ""
+      : String(params.CarrierType);
+
   // B2C 且不索取紙本時必須提供載具或愛心碼
   if (
     params.Category === "B2C" &&
     params.PrintFlag !== "Y" &&
-    !params.CarrierType &&
+    !normalizedCarrierType &&
     !params.LoveCode
   ) {
     throw new ValidationError(
@@ -132,8 +140,21 @@ export function validateInvoiceIssueParams(
     );
   }
 
-  // 提供載具類別時必須提供載具編號
-  if (params.CarrierType && !params.CarrierNum) {
+  // 有提供值時必須落在合法集合內，避免打錯字的無效值被「非 0/1 就不需要編號」
+  // 的邏輯靜默放行，直到 ezpay API 才被拒絕、錯誤訊息也不清楚。
+  if (
+    normalizedCarrierType &&
+    !["0", "1", "2"].includes(normalizedCarrierType)
+  ) {
+    throw new ValidationError("CarrierType", "載具類別格式不正確");
+  }
+
+  // 只有手機條碼（"0"）與自然人憑證（"1"）需要對應的載具編號；
+  // 會員載具（"2"）以買受人資料識別，本來就不帶編號，不可比照要求。
+  if (
+    (normalizedCarrierType === "0" || normalizedCarrierType === "1") &&
+    !params.CarrierNum
+  ) {
     throw new ValidationError(
       "CarrierNum",
       "提供載具類別時必須提供載具編號"
