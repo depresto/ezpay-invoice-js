@@ -78,3 +78,54 @@ describe("validateInvoiceIssueParams — CarrierType 相容性", () => {
     ).toThrow(/CarrierType.*不正確|不正確.*CarrierType/);
   });
 });
+
+/**
+ * 統一編號檢查碼 — 2023-04 新制（%5）
+ *
+ * 背景：財政部自 2023-04 起發放的新統一編號改用「加權和可被 5 整除」的檢查碼規則，
+ * 舊制（可被 10 整除）為其子集。原本寫死 %10 的驗證會把合法新統編誤判為格式錯，
+ * 導致 B2B 開票在 client 端直接拋錯、根本送不到 ezpay（生產實際卡關案例：
+ * app kaiyan 60560570、lustbookstore 60746149）。
+ */
+function buildB2BParams(
+  overrides: Partial<InvoiceIssueParams> = {}
+): InvoiceIssueParams {
+  return buildBaseParams({
+    Category: "B2B",
+    BuyerUBN: "90410461",
+    PrintFlag: "Y",
+    ...overrides,
+  });
+}
+
+describe("validateInvoiceIssueParams — 統一編號檢查碼（2023 新制 %5）", () => {
+  it("新制統編 60560570（加權和 %5=0、第7碼為7）應通過", () => {
+    expect(() =>
+      validateInvoiceIssueParams(buildB2BParams({ BuyerUBN: "60560570" }))
+    ).not.toThrow();
+  });
+
+  it("新制統編 60746149（加權和 %5=0、非第7碼特例）應通過", () => {
+    expect(() =>
+      validateInvoiceIssueParams(buildB2BParams({ BuyerUBN: "60746149" }))
+    ).not.toThrow();
+  });
+
+  it("舊制統編 90410461（加權和 %10=0）仍應通過（不得回歸）", () => {
+    expect(() =>
+      validateInvoiceIssueParams(buildB2BParams({ BuyerUBN: "90410461" }))
+    ).not.toThrow();
+  });
+
+  it("真正無效的統編（加權和 %5!=0，如 12345678）仍應拋錯", () => {
+    expect(() =>
+      validateInvoiceIssueParams(buildB2BParams({ BuyerUBN: "12345678" }))
+    ).toThrow(/統一編號格式不正確/);
+  });
+
+  it("非 8 碼數字（如 1234567）仍應拋錯", () => {
+    expect(() =>
+      validateInvoiceIssueParams(buildB2BParams({ BuyerUBN: "1234567" }))
+    ).toThrow(/BuyerUBN/);
+  });
+});
